@@ -1,6 +1,8 @@
-from django.shortcuts import render
-from django.views.generic import CreateView, UpdateView, DeleteView
-from .models import Cat
+from django.shortcuts import render, redirect
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.views.generic import ListView, DetailView
+from .models import Cat, Toy
+from .forms import FeedingForm
 
 # Import HttpResponse to send text-based responses
 # from django.http import HttpResponse  -- this is used temporarily to show a response before we start using html files
@@ -36,6 +38,25 @@ class CatDelete(DeleteView):
   model = Cat
   success_url = '/cats/'
 
+class ToyCreate(CreateView):
+  model = Toy
+  fields = '__all__'
+  success_url = '/toys/'
+
+class ToyList(ListView):
+  model = Toy
+
+class ToyDetail(DetailView):
+  model = Toy
+
+class ToyUpdate(UpdateView):
+  model = Toy
+  fields = ['name', 'color']
+
+class ToyDelete(DeleteView):
+  model = Toy
+  success_url = '/toys/'
+
 # Define the home view function
 def home(request):
   # return HttpResponse('<h1>Hello ᓚᘏᗢ</h1>')
@@ -50,4 +71,19 @@ def cat_index(request):
 
 def cat_detail(request, cat_id):
   cat = Cat.objects.get(id=cat_id)
-  return render(request, 'cats/detail.html', {'cat': cat})
+  feeding_form = FeedingForm()
+  return render(request, 'cats/detail.html', {
+    'cat': cat,
+    'feeding_form': feeding_form
+  })
+
+def add_feeding(request, cat_id):
+  # create a ModelForm instance using the data in request.POST
+  form = FeedingForm(request.POST)
+  # validate the form
+  if form.is_valid():
+    # don't save the form to the db until it has the cat_id assigned
+    new_feeding = form.save(commit=False)
+    new_feeding.cat_id = cat_id
+    new_feeding.save()
+  return redirect('cat-detail', cat_id=cat_id)
