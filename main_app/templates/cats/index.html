@@ -16,6 +16,9 @@
 <section class="card-container">
   {% for cat in cats %}
     <div class="card">
+      {% comment %} <a href="/cats/{{ cat.id }}"> {% endcomment %}
+      {% comment %} This new way for link prevent hardcoded lines and using a url by referencing the name cat-details found in urls.py {% endcomment %}
+      <a href="{% url "cat-detail" cat.id %}">
       <div class="card-content">
         <div class="card-img-container">
           <img
